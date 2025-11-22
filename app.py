@@ -372,5 +372,5 @@ def inject_current_user():
         current_user = User.query.get(session['user_id'])
     return {'current_user': current_user}
 
-if __name__ == '__main__':
-    app.run(debug=True)
+
+# Zeabur/生产环境部署时不自动运行，仅暴露 app 对象供 gunicorn/uwsgi 调用
