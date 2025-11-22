@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}校园失物招领系统{% endblock %}</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <a href="{{ url_for('index') }}" style="display: flex; align-items: center; gap: 8px; transition: color 0.3s ease;">
+                        <i class="fa-solid fa-archway text-primary"></i>
+                        <span>校园失物招领</span>
+                    </a>
+                </div>
+                <div class="nav-links">
+                    <a href="{{ url_for('index') }}" class="nav-link">
+                        <i class="fa-solid fa-home"></i> 首页
+                    </a>
+                    {% if session.user_id %}
+                        <!-- 已登录：用户图标 + 昵称-->
+                        <span class="nav-nickname" style="margin: 0 10px; color: var(--primary); font-weight: 500; display: flex; align-items: center; gap: 5px;">
+                            <i class="fa-solid fa-user"></i>
+                            {{ current_user.username }}
+                        </span>
+                        <a href="{{ url_for('user_publish') }}" class="nav-link">
+                            <i class="fa-solid fa-list"></i> 我的发布
+                        </a>
+                        <a href="{{ url_for('publish') }}" class="nav-link">
+                            <i class="fa-solid fa-plus-circle"></i> 发布物品
+                        </a>
+                        {% if session.is_admin %}
+                            <a href="{{ url_for('admin_dashboard') }}" class="admin-link nav-link">
+                                <i class="fa-solid fa-cog"></i> 管理员后台
+                            </a>
+                        {% endif %}
+                        <a href="{{ url_for('logout') }}" class="nav-link">
+                            <i class="fa-solid fa-right-from-bracket"></i> 退出登录
+                        </a>
+                    {% else %}
+                        <!-- 未登录：显示登录、注册 -->
+                        <a href="{{ url_for('login') }}" class="nav-link">
+                            <i class="fa-solid fa-right-to-bracket"></i> 登录
+                        </a>
+                        <a href="{{ url_for('register') }}" class="nav-link">
+                            <i class="fa-solid fa-user-plus"></i> 注册
+                        </a>
+                    {% endif %}
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 消息提示框 -->
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-messages flash-{{ category }}" style="margin: 1.5rem auto; animation: fadeInUp 0.5s ease forwards;">
+                        {% if category == 'success' %}
+                            <i class="fa-solid fa-check-circle fa-fw text-success"></i>
+                        {% elif category == 'danger' %}
+                            <i class="fa-solid fa-times-circle fa-fw text-danger"></i>
+                        {% elif category == 'warning' %}
+                            <i class="fa-solid fa-exclamation-triangle fa-fw text-warning"></i>
+                        {% elif category == 'info' %}
+                            <i class="fa-solid fa-info-circle fa-fw text-primary"></i>
+                        {% else %}
+                            <i class="fa-solid fa-exclamation-circle fa-fw text-gray-500"></i>
+                        {% endif %}
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- 主内容区 -->
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+<!-- 页脚 -->
+<footer>
+    <div class="container footer-container">
+        <p class="footer-desc" style="text-align: center; margin: 0 auto;">让每一件遗失的物品都能找到主人，共建文明校园</p>
+    </div>
+    <div class="copyright" style="text-align: center;">© 2025 校园实物招领系统 - 所有权利保留</div>
+</footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. 消息提示框自动消失
+            const flashMessages = document.querySelectorAll('.flash-messages');
+            flashMessages.forEach((msg, index) => {
+                setTimeout(() => {
+                    msg.style.opacity = '1';
+                    msg.style.transform = 'translateY(0)';
+                }, 100 * index);
+
+                setTimeout(() => {
+                    msg.style.transition = 'all 0.5s ease';
+                    msg.style.opacity = '0';
+                    msg.style.transform = 'translateY(-10px)';
+                    setTimeout(() => msg.remove(), 500);
+                }, 3000 + 100 * index);
+            });
+
+            // 2. 导航链接交互
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                const icon = link.querySelector('i');
+                link.addEventListener('mouseenter', () => {
+                    icon.style.transition = 'all 0.3s ease';
+                    icon.style.transform = 'translateX(3px)';
+                    link.style.color = link.classList.contains('admin-link') ? 'var(--danger)' : 'var(--primary)';
+                });
+                link.addEventListener('mouseleave', () => {
+                    icon.style.transform = 'translateX(0)';
+                    link.style.color = link.classList.contains('admin-link') ? 'var(--danger)' : 'var(--gray-700)';
+                });
+                link.addEventListener('click', () => {
+                    link.style.transform = 'scale(0.95)';
+                    setTimeout(() => link.style.transform = 'scale(1)', 100);
+                });
+            });
+
+            // 3. 全局动画样式
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                .flash-messages {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                    transition: all 0.5s ease;
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>

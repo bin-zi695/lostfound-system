@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}校园招领系统-用户注册{% endblock %}
+
+{% block content %}
+    <div class="card" style="max-width: 500px; margin: 3rem auto;">
+        <h2 style="text-align: center; margin-bottom: 2rem; color: var(--gray-800); font-size: 1.5rem;">
+            <i class="fa-solid fa-user-plus" style="color: var(--primary); margin-right: 8px;"></i> 用户注册
+        </h2>
+        <form method="POST" action="{{ url_for('register') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label class="form-label" for="username">用户名</label>
+                <div style="position: relative;">
+                    <i class="fa-solid fa-user" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--gray-400); transition: color 0.3s ease;"></i>
+                    <input type="text" class="form-control" id="username" name="username" required placeholder="请输入用户名" style="padding-left: 40px;">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="email">邮箱</label>
+                <div style="position: relative;">
+                    <i class="fa-solid fa-envelope" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--gray-400); transition: color 0.3s ease;"></i>
+                    <input type="email" class="form-control" id="email" name="email" required placeholder="请输入常用邮箱" style="padding-left: 40px;">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="password">密码</label>
+                <div style="position: relative;">
+                    <i class="fa-solid fa-lock" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--gray-400); transition: color 0.3s ease;"></i>
+                    <input type="password" class="form-control" id="password" name="password" required placeholder="请输入密码（不少于6位）" style="padding-left: 40px;">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="confirm_password">确认密码</label>
+                <div style="position: relative;">
+                    <i class="fa-solid fa-lock-open" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--gray-400); transition: color 0.3s ease;"></i>
+                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required placeholder="请再次输入密码" style="padding-left: 40px;">
+                </div>
+            </div>
+            <button type="submit" class="btn" style="width: 100%;">
+                <i class="fa-solid fa-user-plus"></i> 注册
+            </button>
+            <p style="text-align: center; margin-top: 1.5rem; color: var(--gray-600);">
+                已有账号？<a href="{{ url_for('login') }}" style="color: var(--primary); font-weight: 500; text-decoration: none; transition: color 0.3s ease;">立即登录</a>
+            </p>
+        </form>
+    </div>
+
+    <script>
+        // 表单图标颜色变化
+        const formInputs = document.querySelectorAll('.form-control');
+        formInputs.forEach(input => {
+            const icon = input.parentElement.querySelector('i');
+            input.addEventListener('focus', () => {
+                icon.style.color = 'var(--primary)';
+            });
+            input.addEventListener('blur', () => {
+                icon.style.color = 'var(--gray-400)';
+            });
+        });
+    </script>
+{% endblock %}

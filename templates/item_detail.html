@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}校园招领系统-物品详情页{{ item.title }}{% endblock %}
+
+{% block content %}
+    <div class="detail-container">
+        <div class="detail-image">
+            {% if item.image %}
+                <img src="{{ url_for('static', filename='uploads/' + item.image) }}" alt="{{ item.title }}" style="transition: transform 0.5s ease; cursor: zoom-in;">
+            {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 350px; border-radius: var(--radius-lg); transition: background-color 0.3s ease;">
+                    <i class="fa-solid fa-image text-muted" style="font-size: 80px; opacity: 0.6;"></i>
+                </div>
+            {% endif %}
+        </div>
+        <div class="detail-info">
+            <h2>{{ item.title }}</h2>
+            <div class="detail-meta">
+                <div class="meta-item">
+                    <i class="fa-solid fa-user fa-fw"></i>
+                    <span>发布人：{{ item.user.username }}</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fa-solid fa-clock fa-fw"></i>
+                    <span>发布时间：{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+            </div>
+            <div class="detail-meta">
+                <div class="meta-item">
+                    <i class="fa-solid fa-location-dot fa-fw"></i>
+                    <span>地点：{{ item.place }}</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fa-solid fa-calendar-alt fa-fw"></i>
+                    <span>时间：{{ item.time.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+            </div>
+            <div class="detail-meta">
+                <div class="meta-item">
+                    <i class="fa-solid fa-phone fa-fw"></i>
+                    <span>联系方式：{{ item.contact }}</span>
+                </div>
+            </div>
+            <div class="detail-desc">
+                <h3 style="margin-bottom: 1rem; font-size: 1.2rem;">物品描述</h3>
+                <p>{{ item.description }}</p>
+            </div>
+            <a href="{{ url_for('index') }}" class="btn" style="background-color: var(--gray-700);">
+                <i class="fa-solid fa-arrow-left"></i> 返回首页
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // 图片缩放效果
+        const detailImg = document.querySelector('.detail-image img');
+        if (detailImg) {
+            detailImg.addEventListener('click', function() {
+                this.style.transform = this.style.transform === 'scale(1.05)' ? 'scale(1)' : 'scale(1.05)';
+                this.style.cursor = this.style.transform === 'scale(1.05)' ? 'zoom-out' : 'zoom-in';
+            });
+        }
+    </script>
+{% endblock %}

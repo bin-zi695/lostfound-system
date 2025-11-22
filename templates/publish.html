@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}校园失物招领系统-发布招领{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 style="margin-bottom: 2rem; color: var(--gray-800);">发布失物招领</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+            <label for="title" class="form-label">物品名称</label>
+            <input type="text" class="form-control" id="title" name="title" placeholder="请输入物品名称（如：校园卡、雨伞、笔记本电脑等）" required>
+        </div>
+
+        <div class="form-group">
+            <label for="description" class="form-label">物品描述</label>
+            <textarea class="form-control" id="description" name="description" rows="4" placeholder="请详细描述物品特征（如：颜色、品牌、型号、特殊标记等），帮助他人快速识别" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="place" class="form-label">拾取/丢失地点</label>
+            <input type="text" class="form-control" id="place" name="place" placeholder="请输入具体地点（如：图书馆3楼阅览室、教学楼A栋201教室、食堂一楼）" required>
+        </div>
+
+        <div class="form-group">
+            <label for="time" class="form-label">拾取/丢失时间</label>
+            <input type="date" class="form-control" id="time" name="time" required>
+        </div>
+
+        <div class="form-group">
+            <label for="contact" class="form-label">联系方式</label>
+            <input type="text" class="form-control" id="contact" name="contact" placeholder="请输入手机号或微信号（仅用于失主联系，将严格保密）" required>
+        </div>
+
+        <div class="form-group">
+            <label for="image" class="form-label">物品图片（可选）</label>
+            <input type="file" class="form-control" id="image" name="image" accept="image/png, image/jpg, image/jpeg, image/gif">
+            <small style="margin-top: 0.5rem; display: block; color: var(--gray-600);">
+                支持PNG、JPG、JPEG、GIF格式，文件大小不超过16MB，上传清晰图片可提高找回效率
+            </small>
+        </div>
+
+        <button type="submit" class="btn btn-success" style="margin-top: 1.5rem;">
+            <i class="fas fa-paper-plane"></i> 提交发布
+        </button>
+    </form>
+</div>
+{% endblock %}

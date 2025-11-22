@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}我发布的物品{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-top: 2rem;">
+    <h2 style="margin-bottom: 1.5rem;"><i class="fa-solid fa-list"></i> 我发布的物品</h2>
+    {% if items %}
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>物品名称</th>
+                    <th>描述</th>
+                    <th>地点</th>
+                    <th>时间</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>
+                        <a href="{{ url_for('item_detail', item_id=item.id) }}" style="color: var(--primary); text-decoration: none; transition: var(--transition); font-weight: 500;">
+                            {{ item.title }}
+                        </a>
+                    </td>
+                    <td>{{ item.description|truncate(20) }}</td>
+                    <td>{{ item.place }}</td>
+                    <td>{{ item.time.strftime('%Y-%m-%d') }}</td>
+                    <td>
+                        {% if item.status == 0 %}
+                            <span class="status-tag tag-pending">待审核</span>
+                        {% elif item.status == 1 %}
+                            <span class="status-tag tag-approved">已通过</span>
+                        {% elif item.status == 2 %}
+                            <span class="status-tag tag-rejected">已拒绝</span>
+                        {% elif item.status == 3 %}
+                            <span class="status-tag tag-found">已找到</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.status != 3 %}
+                        <form method="POST" action="{{ url_for('mark_found', item_id=item.id) }}" style="display:inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn action-btn btn-success" onclick="return confirm('确认标记为已找到？');">
+                                <i class="fa-solid fa-check-double"></i> 已找到
+                            </button>
+                        </form>
+                        {% endif %}
+                        <form method="POST" action="{{ url_for('user_delete_item', item_id=item.id) }}" style="display:inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn action-btn btn-danger" onclick="return confirm('确认删除该物品？');">
+                                <i class="fa-solid fa-trash"></i> 删除
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <p style="color: var(--gray-600);">你还没有发布任何物品。</p>
+    {% endif %}
+</div>
+{% endblock %}

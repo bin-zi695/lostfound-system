@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}校园招领系统-管理员后台{% endblock %}
+
+{% block content %}
+    <div class="card" style="margin-top: 2rem;">
+        <!-- 管理员头部 -->
+        <div class="admin-header">
+            <h2 class="admin-title">
+                <i class="fa-solid fa-shield-halved text-primary"></i> 管理员后台
+            </h2>
+            <!-- 统计总招领数（待审核+已通过+已拒绝+已找到） -->
+            <p style="color: var(--gray-600);">共管理 <span style="color: var(--primary); font-weight: 600;">{{ pending|length + approved|length + rejected|length + found|length }}</span> 条招领信息</p>
+        </div>
+
+        <!-- 物品管理表格 -->
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>物品名称</th>
+                        <th>发布人</th>
+                        <th>发布时间</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 合并展示所有状态的物品（含已找到） -->
+                    {% set all_items = pending + approved + rejected + found %}
+                    {% for item in all_items|sort(attribute='created_at', reverse=True) %}
+                        <tr>
+                            <td style="font-weight: 500;">
+                                <a href="{{ url_for('item_detail', item_id=item.id) }}" style="color: var(--primary); text-decoration: none; transition: var(--transition);">
+                                    {{ item.title }}
+                                </a>
+                            </td>
+                            <td>{{ item.user.username }}</td>
+                            <td>{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                <!-- 匹配数据库整数类型（0-待审核、1-已通过、2-已拒绝、3-已找到） -->
+                                {% if item.status == 0 %}
+                                    <span class="status-tag tag-pending">待审核</span>
+                                {% elif item.status == 1 %}
+                                    <span class="status-tag tag-approved">已通过</span>
+                                {% elif item.status == 2 %}
+                                    <span class="status-tag tag-rejected">已拒绝</span>
+                                {% elif item.status == 3 %}
+                                    <span class="status-tag tag-found">已找到</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    {% if item.status == 0 %}
+                                        <!-- 待审核物品：显示通过/拒绝按钮 -->
+                                        <form method="POST" action="{{ url_for('approve_item', item_id=item.id) }}" style="display: inline;">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn action-btn btn-success">
+                                                <i class="fa-solid fa-check"></i> 通过
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{{ url_for('reject_item', item_id=item.id) }}" style="display: inline;">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn action-btn btn-danger">
+                                                <i class="fa-solid fa-times"></i> 拒绝
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                    <!-- 删除按钮始终可见 -->
+                                    <form method="POST" action="{{ url_for('delete_item', item_id=item.id) }}" style="display: inline;" onsubmit="return confirm('确定要删除这条信息吗？删除后不可恢复')">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn action-btn btn-danger" style="margin-left: 0.5rem;">
+                                            <i class="fa-solid fa-trash"></i> 删除
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 2rem; color: var(--gray-500);">
+                                <i class="fa-solid fa-folder-open fa-2x mb-2"></i><br>暂无招领信息可管理
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 数据统计卡片：保持原有样式，统计逻辑不受ID列删除影响 -->
+        <div class="dashboard-stats-row">
+            <div class="card" style="padding: 1.5rem; margin: 0;">
+                <h4 style="color: var(--gray-600); font-size: 0.9rem; margin-bottom: 0.5rem;">总招领数</h4>
+                <p style="font-size: 2rem; font-weight: 700; color: var(--primary);">{{ pending|length + approved_total + rejected|length }}</p>
+            </div>
+            <div class="card" style="padding: 1.5rem; margin: 0;">
+                <h4 style="color: var(--gray-600); font-size: 0.9rem; margin-bottom: 0.5rem;">待审核</h4>
+                <p style="font-size: 2rem; font-weight: 700; color: var(--warning);">{{ pending|length }}</p>
+            </div>
+            <div class="card" style="padding: 1.5rem; margin: 0;">
+                <h4 style="color: var(--gray-600); font-size: 0.9rem; margin-bottom: 0.5rem;">已通过</h4>
+                <p style="font-size: 2rem; font-weight: 700; color: var(--success);">{{ approved_total }}</p>
+            </div>
+            <div class="card" style="padding: 1.5rem; margin: 0;">
+                <h4 style="color: var(--gray-600); font-size: 0.9rem; margin-bottom: 0.5rem;">已拒绝</h4>
+                <p style="font-size: 2rem; font-weight: 700; color: var(--danger);">{{ rejected|length }}</p>
+            </div>
+            <div class="card" style="padding: 1.5rem; margin: 0;">
+                <h4 style="color: var(--gray-600); font-size: 0.9rem; margin-bottom: 0.5rem;">已找到</h4>
+                <p style="font-size: 2rem; font-weight: 700; color: #38b000;">{{ found|length }}</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 表格行hover动画优化
+            const tableRows = document.querySelectorAll('.data-table tbody tr');
+            tableRows.forEach(row => {
+                row.addEventListener('mouseenter', () => {
+                    row.style.transform = 'translateY(-1px)';
+                    row.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+                    row.style.transition = 'all 0.3s ease';
+                });
+                row.addEventListener('mouseleave', () => {
+                    row.style.transform = 'translateY(0)';
+                    row.style.boxShadow = 'none';
+                });
+            });
+
+            // 操作按钮交互增强
+            const actionBtns = document.querySelectorAll('.action-btn');
+            actionBtns.forEach(btn => {
+                btn.addEventListener('mouseenter', () => {
+                    btn.querySelector('i').style.transform = 'scale(1.1)';
+                    btn.style.transform = 'translateY(-1px)';
+                });
+                btn.addEventListener('mouseleave', () => {
+                    btn.querySelector('i').style.transform = 'scale(1)';
+                    btn.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
+{% endblock %}
